@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown → 微信公众号</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- marked v4 — 稳定 API，支持自定义 Renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="app-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+    <h1 class="app-title">Markdown → 微信公众号</h1>
+  </div>
+
+  <div class="controls">
+    <!-- 主题 -->
+    <div class="ctrl">
+      <label for="theme-select">主题</label>
+      <select id="theme-select">
+        <option value="default">默认简洁</option>
+        <option value="tech">科技感</option>
+        <option value="literary">文艺清新</option>
+      </select>
+    </div>
+
+    <!-- 字号 -->
+    <div class="ctrl">
+      <label for="font-size">字号</label>
+      <input type="range" id="font-size" min="13" max="19" value="15" step="1">
+      <span class="val" id="font-size-val">15px</span>
+    </div>
+
+    <!-- 行高 -->
+    <div class="ctrl">
+      <label for="line-height">行高</label>
+      <input type="range" id="line-height" min="1.4" max="2.2" value="1.75" step="0.05">
+      <span class="val" id="line-height-val">1.75</span>
+    </div>
+
+    <!-- 主色 -->
+    <div class="ctrl">
+      <label for="accent-color">主色</label>
+      <input type="color" id="accent-color" value="#07c160" title="标题、引用、链接等的强调色">
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<div class="app-body">
+
+  <!-- 左：编辑器 -->
+  <div class="pane editor-pane">
+    <div class="pane-hd">
+      <div class="pane-hd-left">
+        <span class="pane-title">编辑</span>
+        <label class="upload-label" title="支持 .md / .markdown / .txt，也可直接拖拽到编辑区">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          上传文件
+          <input type="file" id="file-input" accept=".md,.markdown,.txt" hidden>
+        </label>
+      </div>
+      <div class="pane-hd-right">
+        <div class="stats">
+          <span id="char-count">0 字符</span>
+          <span id="word-count">中文 0 字</span>
+        </div>
+      </div>
+    </div>
+    <textarea id="editor" placeholder="在此输入 Markdown 内容，或上传 .md 文件…&#10;&#10;支持拖拽文件到此区域"></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 右：预览 -->
+  <div class="pane preview-pane">
+    <div class="pane-hd">
+      <div class="pane-hd-left">
+        <span class="pane-title">预览</span>
+      </div>
+      <div class="pane-hd-right">
+        <button class="btn btn-secondary" id="copy-html-btn" title="复制 HTML 源码">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          复制 HTML
+        </button>
+        <button class="btn btn-primary" id="copy-rich-btn" title="复制富文本，可直接粘贴到微信公众号编辑器">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          复制富文本
+        </button>
+      </div>
+    </div>
+    <div class="preview-scroll">
+      <div class="preview-card">
+        <div id="preview"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast toast--success" id="toast"></div>
+
+<script src="js/themes.js"></script>
+<script src="js/converter.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

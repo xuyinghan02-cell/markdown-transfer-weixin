@@ -1,0 +1,126 @@
+/**
+ * 主题定义
+ * 每个主题包含默认变量和样式生成函数
+ * 所有样式均为 inline style，确保微信公众号兼容性
+ */
+const THEMES = {
+  default: {
+    name: '默认简洁',
+    vars: {
+      accentColor: '#07c160',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif',
+      fontSize: 15,
+      lineHeight: 1.75,
+      textColor: '#333333',
+      mutedColor: '#666666',
+    },
+    styles(vars) {
+      return {
+        wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word; -webkit-text-size-adjust: 100%;`,
+        h1: `display: block; font-size: 22px; font-weight: bold; color: #1a1a1a; margin: 28px 0 14px 0; line-height: 1.4; text-align: center; letter-spacing: 1px;`,
+        h2: `display: block; font-size: 18px; font-weight: bold; color: #1a1a1a; margin: 24px 0 12px 0; line-height: 1.4; border-bottom: 2px solid ${vars.accentColor}; padding-bottom: 6px;`,
+        h3: `display: block; font-size: ${vars.fontSize + 2}px; font-weight: bold; color: #1a1a1a; margin: 20px 0 10px 0; line-height: 1.4; padding-left: 10px; border-left: 3px solid ${vars.accentColor};`,
+        h4: `display: block; font-size: ${vars.fontSize + 1}px; font-weight: bold; color: #1a1a1a; margin: 16px 0 8px 0; line-height: 1.4;`,
+        h5: `display: block; font-size: ${vars.fontSize}px; font-weight: bold; color: #555555; margin: 14px 0 7px 0; line-height: 1.4;`,
+        h6: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: bold; color: #777777; margin: 12px 0 6px 0; line-height: 1.4;`,
+        p: `display: block; margin: 12px 0; line-height: ${vars.lineHeight}; color: ${vars.textColor}; font-size: ${vars.fontSize}px;`,
+        strong: `font-weight: bold; color: #1a1a1a;`,
+        em: `font-style: italic;`,
+        del: `text-decoration: line-through; color: #999999;`,
+        inlineCode: `background-color: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 87%; color: #e83e8c;`,
+        pre: `display: block; background-color: #f8f8f8; border-radius: 6px; padding: 16px; margin: 16px 0; overflow-x: auto;`,
+        preCode: `background-color: transparent; padding: 0; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 13px; line-height: 1.6; color: #333333; white-space: pre;`,
+        blockquote: `display: block; border-left: 4px solid ${vars.accentColor}; padding: 10px 16px; margin: 16px 0; background-color: #f9f9f9; color: ${vars.mutedColor};`,
+        ul: `display: block; padding-left: 24px; margin: 12px 0;`,
+        ol: `display: block; padding-left: 24px; margin: 12px 0;`,
+        li: `display: list-item; margin: 6px 0; line-height: ${vars.lineHeight}; font-size: ${vars.fontSize}px; color: ${vars.textColor};`,
+        a: `color: ${vars.accentColor}; text-decoration: none;`,
+        img: `display: block; max-width: 100%; height: auto; margin: 16px auto;`,
+        hr: `display: block; border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;`,
+        table: `border-collapse: collapse; width: 100%; margin: 16px 0; font-size: ${vars.fontSize - 1}px;`,
+        th: `background-color: #f5f5f5; border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; font-weight: bold; color: #1a1a1a;`,
+        td: `border: 1px solid #e5e7eb; padding: 8px 12px; color: ${vars.textColor};`,
+      };
+    },
+  },
+
+  tech: {
+    name: '科技感',
+    vars: {
+      accentColor: '#4f9cf9',
+      fontFamily: '"PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, Arial, sans-serif',
+      fontSize: 15,
+      lineHeight: 1.8,
+      textColor: '#2d3748',
+      mutedColor: '#718096',
+    },
+    styles(vars) {
+      return {
+        wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word;`,
+        h1: `display: block; font-size: 24px; font-weight: 700; color: ${vars.accentColor}; margin: 28px 0 14px 0; line-height: 1.3; text-align: center; letter-spacing: 2px;`,
+        h2: `display: block; font-size: 19px; font-weight: 700; color: #1a202c; margin: 24px 0 12px 0; line-height: 1.4; background-color: #ebf4ff; padding: 8px 14px; border-left: 4px solid ${vars.accentColor};`,
+        h3: `display: block; font-size: ${vars.fontSize + 2}px; font-weight: 600; color: ${vars.accentColor}; margin: 20px 0 10px 0; line-height: 1.4;`,
+        h4: `display: block; font-size: ${vars.fontSize + 1}px; font-weight: 600; color: #2d3748; margin: 16px 0 8px 0; line-height: 1.4;`,
+        h5: `display: block; font-size: ${vars.fontSize}px; font-weight: 600; color: #4a5568; margin: 14px 0 7px 0; line-height: 1.4;`,
+        h6: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: 600; color: #718096; margin: 12px 0 6px 0; line-height: 1.4;`,
+        p: `display: block; margin: 12px 0; line-height: ${vars.lineHeight}; color: ${vars.textColor}; font-size: ${vars.fontSize}px;`,
+        strong: `font-weight: bold; color: #1a202c;`,
+        em: `font-style: italic; color: #4a5568;`,
+        del: `text-decoration: line-through; color: #a0aec0;`,
+        inlineCode: `background-color: #1a202c; padding: 2px 6px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 87%; color: #68d391;`,
+        pre: `display: block; background-color: #1a202c; border-radius: 8px; padding: 18px; margin: 16px 0; overflow-x: auto;`,
+        preCode: `background-color: transparent; padding: 0; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; line-height: 1.6; color: #e2e8f0; white-space: pre;`,
+        blockquote: `display: block; border-left: 4px solid ${vars.accentColor}; padding: 12px 16px; margin: 16px 0; background-color: #ebf4ff; color: #2b6cb0; border-radius: 0 6px 6px 0;`,
+        ul: `display: block; padding-left: 24px; margin: 12px 0;`,
+        ol: `display: block; padding-left: 24px; margin: 12px 0;`,
+        li: `display: list-item; margin: 6px 0; line-height: ${vars.lineHeight}; font-size: ${vars.fontSize}px; color: ${vars.textColor};`,
+        a: `color: ${vars.accentColor}; text-decoration: none;`,
+        img: `display: block; max-width: 100%; height: auto; margin: 16px auto; border-radius: 6px;`,
+        hr: `display: block; border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;`,
+        table: `border-collapse: collapse; width: 100%; margin: 16px 0; font-size: ${vars.fontSize - 1}px;`,
+        th: `background-color: ${vars.accentColor}; border: 1px solid #bee3f8; padding: 10px 14px; text-align: left; font-weight: bold; color: #ffffff;`,
+        td: `border: 1px solid #e2e8f0; padding: 8px 14px; color: ${vars.textColor};`,
+      };
+    },
+  },
+
+  literary: {
+    name: '文艺清新',
+    vars: {
+      accentColor: '#c0834b',
+      fontFamily: 'Georgia, "Times New Roman", "Songti SC", "SimSun", serif',
+      fontSize: 16,
+      lineHeight: 2.0,
+      textColor: '#3d2b1f',
+      mutedColor: '#8a6a5a',
+    },
+    styles(vars) {
+      return {
+        wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word;`,
+        h1: `display: block; font-size: 26px; font-weight: bold; color: #2d1f15; margin: 32px 0 16px 0; line-height: 1.4; text-align: center; letter-spacing: 3px;`,
+        h2: `display: block; font-size: 20px; font-weight: bold; color: #2d1f15; margin: 28px 0 14px 0; line-height: 1.4; text-align: center; border-bottom: 1px solid #d4b8a0; padding-bottom: 8px;`,
+        h3: `display: block; font-size: ${vars.fontSize + 2}px; font-weight: bold; color: ${vars.accentColor}; margin: 22px 0 11px 0; line-height: 1.4;`,
+        h4: `display: block; font-size: ${vars.fontSize + 1}px; font-weight: bold; color: #3d2b1f; margin: 18px 0 9px 0; line-height: 1.4;`,
+        h5: `display: block; font-size: ${vars.fontSize}px; font-weight: bold; color: #5a4030; margin: 14px 0 7px 0; line-height: 1.4;`,
+        h6: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: bold; color: #8a6a5a; margin: 12px 0 6px 0; line-height: 1.4;`,
+        p: `display: block; margin: 14px 0; line-height: ${vars.lineHeight}; color: ${vars.textColor}; font-size: ${vars.fontSize}px; text-indent: 2em;`,
+        strong: `font-weight: bold; color: #2d1f15;`,
+        em: `font-style: italic; color: ${vars.accentColor};`,
+        del: `text-decoration: line-through; color: #b09080;`,
+        inlineCode: `background-color: #fdf6ee; padding: 2px 5px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 87%; color: ${vars.accentColor};`,
+        pre: `display: block; background-color: #fdf6ee; border-radius: 6px; padding: 16px; margin: 16px 0; border-left: 4px solid ${vars.accentColor}; overflow-x: auto;`,
+        preCode: `background-color: transparent; padding: 0; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; line-height: 1.6; color: #5a4030; white-space: pre;`,
+        blockquote: `display: block; border-left: 4px solid ${vars.accentColor}; padding: 12px 20px; margin: 20px 0; background-color: #fdf6ee; color: ${vars.mutedColor}; font-style: italic;`,
+        ul: `display: block; padding-left: 24px; margin: 14px 0;`,
+        ol: `display: block; padding-left: 24px; margin: 14px 0;`,
+        li: `display: list-item; margin: 8px 0; line-height: ${vars.lineHeight}; font-size: ${vars.fontSize}px; color: ${vars.textColor};`,
+        a: `color: ${vars.accentColor}; text-decoration: underline; text-underline-offset: 3px;`,
+        img: `display: block; max-width: 100%; height: auto; margin: 20px auto; border-radius: 4px;`,
+        hr: `display: block; border: none; border-top: 1px dashed #d4b8a0; margin: 32px 0;`,
+        table: `border-collapse: collapse; width: 100%; margin: 16px 0; font-size: ${vars.fontSize - 1}px;`,
+        th: `background-color: #fdf6ee; border: 1px solid #e8d5c0; padding: 8px 12px; text-align: left; font-weight: bold; color: #3d2b1f;`,
+        td: `border: 1px solid #e8d5c0; padding: 8px 12px; color: ${vars.textColor};`,
+      };
+    },
+  },
+};
