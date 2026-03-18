@@ -13,11 +13,11 @@
 调用 MCP 工具 `convert_markdown_to_weixin`，参数如下：
 
 - `markdown`：用户提供的 Markdown 文本（必填）
-- `theme`：若用户未指定，默认使用 `default`
-  - `default` — 默认简洁
+- `theme`：若用户未指定，默认使用 `literary`
+  - `literary` — 文艺清新（衬线字体，**深红色调**，默认主题）
+  - `default` — 默认简洁（绿色主色，清晰易读）
   - `tech` — 科技感（深色代码块、蓝色高亮）
-  - `literary` — 文艺清新（衬线字体、暖棕色调）
-- `accent_color`：可选，覆盖主色调，十六进制如 `#07c160`
+- `accent_color`：可选，覆盖主色调，十六进制如 `#8b1a1a`
 - `font_size`：可选，基础字号（px），建议 13–19
 - `line_height`：可选，行高倍数，建议 1.4–2.2
 - `open_browser`：默认 `true`，自动打开浏览器写入剪切板
@@ -26,7 +26,14 @@
 > 转换完成，浏览器已自动打开预览页面并将富文本写入剪切板。
 > 请切换到**微信公众号编辑器**，直接按 Ctrl+V（或 Cmd+V）粘贴即可。
 
-### 2. 如果用户没有提供内容，只是想了解如何接入
+### 2. 如果用户想使用自定义主题或从公众号提取风格
+
+告知用户使用独立网页（`standalone.html`）中的主题管理功能：
+
+- **自定义主题**：点击「主题管理」→「新建主题」，可设置颜色、字号、字体，并对各标题/段落元素单独覆盖 CSS
+- **从公众号提取**：点击「主题管理」→「从公众号提取」，粘贴文章 HTML 源码（浏览器 `Ctrl+U`），自动解析排版样式生成可编辑主题
+
+### 3. 如果用户没有提供内容，只是想了解如何接入
 
 参照下方 **MCP 接入说明** 输出给用户。
 
@@ -90,10 +97,10 @@ npm install
 
 参数：
   markdown     (string, 必填)  要转换的 Markdown 内容
-  theme        (string, 可选)  default | tech | literary
-  accent_color (string, 可选)  主色，如 #07c160
-  font_size    (number, 可选)  字号 px，如 15
-  line_height  (number, 可选)  行高倍数，如 1.75
+  theme        (string, 可选)  literary（默认）| default | tech
+  accent_color (string, 可选)  主色，如 #8b1a1a
+  font_size    (number, 可选)  字号 px，如 16
+  line_height  (number, 可选)  行高倍数，如 2.0
   open_browser (boolean, 可选) 是否打开浏览器写剪切板，默认 true
 ```
 
