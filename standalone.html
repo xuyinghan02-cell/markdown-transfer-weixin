@@ -309,6 +309,104 @@ html, body {
   .ctrl input[type="range"] { width: 52px; }
 }
 
+/* ── Modal System ─────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; width: min(580px, 93vw);
+  max-height: 84vh; display: flex; flex-direction: column;
+  transform: translateY(14px); transition: transform 0.2s;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-hd {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.modal-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.modal-x {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 20px; line-height: 1; padding: 0 5px; border-radius: 4px;
+}
+.modal-x:hover { background: var(--bg); color: var(--text); }
+.modal-bd { padding: 18px; overflow-y: auto; flex: 1; }
+.modal-ft {
+  padding: 12px 18px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0;
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+.fg { margin-bottom: 14px; }
+.fg:last-child { margin-bottom: 0; }
+.fl { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
+.fi {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px; padding: 7px 10px;
+  font-size: 13px; outline: none; transition: border-color 0.15s; font-family: inherit;
+}
+.fi:focus { border-color: var(--accent); }
+textarea.fi { resize: vertical; min-height: 80px; line-height: 1.5; }
+.fhint { font-size: 11px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
+.fhint a { color: var(--accent); text-decoration: none; }
+.frow { display: flex; gap: 8px; align-items: center; }
+.frow .fi { flex: 1; }
+.frow input[type="color"] {
+  width: 34px; height: 34px; border: 1px solid var(--border);
+  border-radius: 5px; background: var(--bg); padding: 2px 3px; cursor: pointer; flex-shrink: 0;
+}
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 500px) { .fgrid { grid-template-columns: 1fr; } }
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.tab-btn {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-dim); cursor: pointer; padding: 8px 14px; font-size: 12px;
+  margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── Theme list ───────────────────────────────────────────── */
+.tl { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.tl-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.tl-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
+.tl-name { flex: 1; font-size: 13px; color: var(--text); }
+.tl-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  background: var(--border); color: var(--text-dim);
+}
+.tl-actions { display: flex; gap: 5px; }
+.tl-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-dim);
+  border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+}
+.tl-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tl-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ── Status ───────────────────────────────────────────────── */
+.ns {
+  padding: 10px 14px; border-radius: 6px; font-size: 12px;
+  margin-top: 12px; display: none; line-height: 1.5;
+}
+.ns.show { display: block; }
+.ns.loading { background: var(--surface2); color: var(--accent); border: 1px solid var(--border); }
+.ns.ok  { background: var(--surface2); color: var(--success); border: 1px solid var(--border); }
+.ns.err { background: var(--surface2); color: var(--danger); border: 1px solid var(--border); }
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
 </head>
@@ -348,6 +446,16 @@ html, body {
       <label for="accent-color">主色</label>
       <input type="color" id="accent-color" value="#07c160">
     </div>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0;">
+    <button class="btn btn-secondary" onclick="openModal('notion-modal')" style="padding:3px 10px;font-size:12px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 14h6v6H4z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/></svg>
+      Notion
+    </button>
+    <button class="btn btn-secondary" onclick="openThemeManager()" style="padding:3px 10px;font-size:12px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      主题管理
+    </button>
   </div>
 </header>
 
@@ -407,6 +515,55 @@ html, body {
 </div>
 
 <div class="toast toast--success" id="toast"></div>
+
+<!-- ── Notion Import Modal ──────────────────────────────── -->
+<div class="modal-overlay" id="notion-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">从 Notion 导入</span>
+      <button class="modal-x" onclick="closeModal('notion-modal')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div class="fg">
+        <label class="fl">Integration Token（Internal Integration Secret）</label>
+        <input class="fi" id="notion-token" type="password" placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        <div class="fhint">在 notion.so/my-integrations 创建 Integration 后获取 Token，并将目标页面分享给该 Integration</div>
+      </div>
+      <div class="fg">
+        <label class="fl">页面 URL 或页面 ID</label>
+        <input class="fi" id="notion-page" placeholder="https://www.notion.so/... 或 32位页面ID">
+      </div>
+      <div class="fg">
+        <label class="fl">CORS 代理前缀（解决跨域，可选）</label>
+        <input class="fi" id="notion-proxy" placeholder="例：https://corsproxy.io/?url=">
+        <div class="fhint">浏览器直连 Notion API 会被 CORS 拦截。可使用第三方代理，或本地运行 <code style="color:var(--accent)">node notion-proxy.js</code> 后填 <code style="color:var(--accent)">http://localhost:3100/</code></div>
+      </div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-dim);">
+          <input type="checkbox" id="notion-auto-copy" checked>
+          导入完成后自动复制富文本到剪切板
+        </label>
+      </div>
+      <div class="ns" id="notion-status"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-secondary" onclick="closeModal('notion-modal')">取消</button>
+      <button class="btn btn-primary" id="notion-fetch-btn" onclick="fetchNotion()">获取并转换</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Theme Manager Modal ──────────────────────────────── -->
+<div class="modal-overlay" id="theme-modal">
+  <div class="modal" style="width:min(640px,94vw)">
+    <div class="modal-hd">
+      <span class="modal-title" id="theme-modal-title">主题管理</span>
+      <button class="modal-x" onclick="closeModal('theme-modal')">×</button>
+    </div>
+    <div class="modal-bd" id="theme-modal-bd"></div>
+    <div class="modal-ft" id="theme-modal-ft"></div>
+  </div>
+</div>
 
 <script>
 /**
@@ -854,9 +1011,9 @@ async function copyHtmlSource() {
 
 // ── 主题切换 ─────────────────────────────────────────────────
 function applyTheme(themeKey) {
-  currentTheme = THEMES[themeKey];
+  // Support built-in and custom: themes
+  currentTheme = (typeof getTheme === 'function') ? getTheme(themeKey) : (THEMES[themeKey] || THEMES.default);
   overrides = {};
-  // 同步控件到新主题默认值
   const v = currentTheme.vars;
   fontSizeInput.value    = v.fontSize;
   fontSizeVal.textContent = v.fontSize + 'px';
@@ -939,7 +1096,562 @@ editor.addEventListener('keydown', (e) => {
 // ── 初始化 ───────────────────────────────────────────────────
 editor.value = DEMO_MARKDOWN;
 render();
+populateThemeSelect();
+// 恢复上次保存的 Notion token / proxy
+const _nt = localStorage.getItem('notion_token');
+const _np = localStorage.getItem('notion_proxy');
+if (_nt) document.getElementById('notion-token').value = _nt;
+if (_np) document.getElementById('notion-proxy').value = _np;
 
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   Modal utilities
+═══════════════════════════════════════════════════════════ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
+});
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   Custom Theme Manager
+═══════════════════════════════════════════════════════════ */
+const CTHEME_KEY = 'wx_custom_themes_v2';
+
+function loadCustomThemes() {
+  try { return JSON.parse(localStorage.getItem(CTHEME_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveCustomThemes(obj) {
+  localStorage.setItem(CTHEME_KEY, JSON.stringify(obj));
+}
+
+let customThemes = loadCustomThemes();
+
+/**
+ * Build a runtime theme object from stored custom theme data.
+ * Custom themes inherit the styles() of a base built-in theme, but
+ * allow overriding any individual element style via styleOverrides.
+ */
+function buildCustomTheme(data) {
+  const base = THEMES[data.base || 'default'] || THEMES.default;
+  const vars = Object.assign({}, base.vars, data.vars || {});
+  const baseStyles = base.styles(vars);
+  const styles = Object.assign({}, baseStyles, data.styleOverrides || {});
+  return {
+    name: data.name,
+    vars,
+    styles: () => styles,
+  };
+}
+
+function getTheme(key) {
+  if (key && key.startsWith('custom:')) {
+    const ckey = key.slice(7);
+    if (customThemes[ckey]) return buildCustomTheme(customThemes[ckey]);
+  }
+  return THEMES[key] || THEMES.default;
+}
+
+function populateThemeSelect() {
+  // Remove existing custom options (index >= 3)
+  while (themeSelect.options.length > 3) themeSelect.remove(3);
+  Object.entries(customThemes).forEach(([k, t]) => {
+    const opt = document.createElement('option');
+    opt.value = 'custom:' + k;
+    opt.textContent = t.name || k;
+    themeSelect.appendChild(opt);
+  });
+}
+
+// ── Theme Manager UI ─────────────────────────────────────────
+
+function openThemeManager() {
+  renderThemeList();
+  openModal('theme-modal');
+}
+
+function renderThemeList() {
+  document.getElementById('theme-modal-title').textContent = '主题管理';
+  const bd = document.getElementById('theme-modal-bd');
+  const ft = document.getElementById('theme-modal-ft');
+
+  const builtins = [
+    { key: 'default',  label: '默认简洁', color: '#07c160' },
+    { key: 'tech',     label: '科技感',   color: '#4f9cf9' },
+    { key: 'literary', label: '文艺清新', color: '#c0834b' },
+  ];
+
+  let html = '<ul class="tl">';
+  builtins.forEach(({ key, label, color }) => {
+    html += `<li class="tl-item">
+      <span class="tl-dot" style="background:${color}"></span>
+      <span class="tl-name">${label}</span>
+      <span class="tl-badge">内置</span>
+    </li>`;
+  });
+  Object.entries(customThemes).forEach(([k, t]) => {
+    const color = t.vars?.accentColor || '#07c160';
+    html += `<li class="tl-item">
+      <span class="tl-dot" style="background:${color}"></span>
+      <span class="tl-name">${escHtml(t.name || k)}</span>
+      <span class="tl-badge">自定义</span>
+      <div class="tl-actions">
+        <button class="tl-btn" onclick="editCustomTheme('${k}')">编辑</button>
+        <button class="tl-btn danger" onclick="deleteCustomTheme('${k}')">删除</button>
+      </div>
+    </li>`;
+  });
+  html += '</ul>';
+
+  bd.innerHTML = html;
+  ft.innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal('theme-modal')">关闭</button>
+    <button class="btn btn-primary" onclick="showThemeEditor(null)">+ 新建主题</button>
+  `;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/**
+ * Show theme editor.
+ * key=null → create new; key=string → edit existing custom theme
+ */
+function showThemeEditor(key) {
+  const existing = key ? customThemes[key] : null;
+  const base = existing?.base || 'default';
+  const vars = existing?.vars || {};
+  const overridesJson = existing?.styleOverrides ? JSON.stringify(existing.styleOverrides, null, 2) : '{}';
+
+  document.getElementById('theme-modal-title').textContent = key ? '编辑主题' : '新建主题';
+
+  const bd = document.getElementById('theme-modal-bd');
+  bd.innerHTML = `
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'tab-basic')">基础设置</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-adv')">样式覆盖 (JSON)</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-import')">导入 / 导出</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-basic">
+      <div class="fgrid">
+        <div class="fg">
+          <label class="fl">主题名称</label>
+          <input class="fi" id="te-name" value="${escHtml(existing?.name || '我的主题')}" placeholder="主题名称">
+        </div>
+        <div class="fg">
+          <label class="fl">继承自</label>
+          <select class="fi" id="te-base">
+            <option value="default" ${base==='default'?'selected':''}>默认简洁</option>
+            <option value="tech" ${base==='tech'?'selected':''}>科技感</option>
+            <option value="literary" ${base==='literary'?'selected':''}>文艺清新</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrid">
+        <div class="fg">
+          <label class="fl">主色 (accentColor)</label>
+          <div class="frow">
+            <input type="color" id="te-accent" value="${vars.accentColor || '#07c160'}">
+            <input class="fi" id="te-accent-hex" value="${vars.accentColor || '#07c160'}" placeholder="#07c160">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">正文色 (textColor)</label>
+          <div class="frow">
+            <input type="color" id="te-text" value="${vars.textColor || '#333333'}">
+            <input class="fi" id="te-text-hex" value="${vars.textColor || '#333333'}" placeholder="#333333">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">辅助色 (mutedColor)</label>
+          <div class="frow">
+            <input type="color" id="te-muted" value="${vars.mutedColor || '#666666'}">
+            <input class="fi" id="te-muted-hex" value="${vars.mutedColor || '#666666'}" placeholder="#666666">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">字号 (fontSize)</label>
+          <div class="frow">
+            <input type="range" min="12" max="20" step="1" id="te-fs" value="${vars.fontSize || 15}" style="flex:1;accent-color:var(--accent);">
+            <span id="te-fs-val" style="min-width:32px;font-size:12px;color:var(--text)">${vars.fontSize || 15}px</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">行高 (lineHeight)</label>
+          <div class="frow">
+            <input type="range" min="1.4" max="2.2" step="0.05" id="te-lh" value="${vars.lineHeight || 1.75}" style="flex:1;accent-color:var(--accent);">
+            <span id="te-lh-val" style="min-width:36px;font-size:12px;color:var(--text)">${parseFloat(vars.lineHeight || 1.75).toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="fg" style="grid-column:1/-1">
+          <label class="fl">字体 (fontFamily)</label>
+          <input class="fi" id="te-font" value="${escHtml(vars.fontFamily || '')}" placeholder="留空使用继承主题的字体">
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-adv">
+      <div class="fg">
+        <label class="fl">元素样式覆盖 (JSON，键为元素名如 h1 h2 p blockquote 等，值为完整 CSS 字符串)</label>
+        <textarea class="fi" id="te-overrides" rows="12" style="font-family:monospace;font-size:12px;">${escHtml(overridesJson)}</textarea>
+        <div class="fhint">可覆盖的键：h1 h2 h3 h4 h5 h6 p strong em del inlineCode pre preCode blockquote ul ol li a img hr table th td wrapper</div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-import">
+      <div class="fg">
+        <label class="fl">导出当前主题 (JSON)</label>
+        <textarea class="fi" id="te-export-area" rows="6" readonly style="font-family:monospace;font-size:12px;"></textarea>
+        <button class="btn btn-secondary" style="margin-top:6px;font-size:12px;" onclick="exportThemeJson('${key||''}')">生成导出 JSON</button>
+      </div>
+      <div class="fg" style="margin-top:14px;">
+        <label class="fl">导入主题 JSON（粘贴后点击导入）</label>
+        <textarea class="fi" id="te-import-area" rows="6" placeholder='{"name":"...","base":"default","vars":{...},"styleOverrides":{...}}' style="font-family:monospace;font-size:12px;"></textarea>
+        <button class="btn btn-secondary" style="margin-top:6px;font-size:12px;" onclick="importThemeJson()">导入</button>
+      </div>
+    </div>
+  `;
+
+  // sync color pickers ↔ hex inputs
+  ['accent','text','muted'].forEach(id => {
+    const picker = document.getElementById('te-' + id);
+    const hex    = document.getElementById('te-' + id + '-hex');
+    picker.addEventListener('input', () => hex.value = picker.value);
+    hex.addEventListener('input', () => {
+      if (/^#[0-9a-f]{6}$/i.test(hex.value)) picker.value = hex.value;
+    });
+  });
+  document.getElementById('te-fs').addEventListener('input', function() {
+    document.getElementById('te-fs-val').textContent = this.value + 'px';
+  });
+  document.getElementById('te-lh').addEventListener('input', function() {
+    document.getElementById('te-lh-val').textContent = parseFloat(this.value).toFixed(2);
+  });
+
+  const ft = document.getElementById('theme-modal-ft');
+  ft.innerHTML = `
+    <button class="btn btn-secondary" onclick="renderThemeList(); document.getElementById('theme-modal-title').textContent='主题管理';">← 返回</button>
+    <button class="btn btn-primary" onclick="saveThemeEditor('${key||''}')">保存主题</button>
+  `;
+}
+
+function switchTab(btn, paneId) {
+  btn.closest('.modal-bd').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.closest('.modal-bd').querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+function saveThemeEditor(editKey) {
+  const name = document.getElementById('te-name').value.trim() || '自定义主题';
+  let overrides = {};
+  try {
+    overrides = JSON.parse(document.getElementById('te-overrides').value || '{}');
+    if (typeof overrides !== 'object' || Array.isArray(overrides)) throw new Error();
+  } catch {
+    alert('样式覆盖 JSON 格式错误，请检查。'); return;
+  }
+
+  const fontVal = document.getElementById('te-font').value.trim();
+  const vars = {
+    accentColor: document.getElementById('te-accent-hex').value || document.getElementById('te-accent').value,
+    textColor:   document.getElementById('te-text-hex').value   || document.getElementById('te-text').value,
+    mutedColor:  document.getElementById('te-muted-hex').value  || document.getElementById('te-muted').value,
+    fontSize:    parseInt(document.getElementById('te-fs').value),
+    lineHeight:  parseFloat(document.getElementById('te-lh').value),
+  };
+  if (fontVal) vars.fontFamily = fontVal;
+
+  const key = editKey || ('t' + Date.now());
+  customThemes[key] = {
+    name,
+    base: document.getElementById('te-base').value,
+    vars,
+    styleOverrides: overrides,
+  };
+  saveCustomThemes(customThemes);
+  populateThemeSelect();
+  renderThemeList();
+  document.getElementById('theme-modal-title').textContent = '主题管理';
+  showToast('✓ 主题已保存：' + name);
+}
+
+function editCustomTheme(key) { showThemeEditor(key); }
+
+function deleteCustomTheme(key) {
+  if (!confirm('确定删除主题「' + (customThemes[key]?.name || key) + '」？')) return;
+  delete customThemes[key];
+  saveCustomThemes(customThemes);
+  populateThemeSelect();
+  // If current theme was this one, revert to default
+  if (themeSelect.value === 'custom:' + key) {
+    themeSelect.value = 'default';
+    applyTheme('default');
+  }
+  renderThemeList();
+}
+
+function exportThemeJson(editKey) {
+  const name = document.getElementById('te-name')?.value.trim() || '自定义主题';
+  let overrides = {};
+  try { overrides = JSON.parse(document.getElementById('te-overrides').value || '{}'); } catch {}
+  const fontVal = document.getElementById('te-font').value.trim();
+  const vars = {
+    accentColor: document.getElementById('te-accent-hex').value,
+    textColor:   document.getElementById('te-text-hex').value,
+    mutedColor:  document.getElementById('te-muted-hex').value,
+    fontSize:    parseInt(document.getElementById('te-fs').value),
+    lineHeight:  parseFloat(document.getElementById('te-lh').value),
+  };
+  if (fontVal) vars.fontFamily = fontVal;
+  const data = { name, base: document.getElementById('te-base').value, vars, styleOverrides: overrides };
+  document.getElementById('te-export-area').value = JSON.stringify(data, null, 2);
+}
+
+function importThemeJson() {
+  try {
+    const data = JSON.parse(document.getElementById('te-import-area').value);
+    if (!data.name) throw new Error('缺少 name 字段');
+    const key = 't' + Date.now();
+    customThemes[key] = data;
+    saveCustomThemes(customThemes);
+    populateThemeSelect();
+    showToast('✓ 已导入主题：' + data.name);
+    renderThemeList();
+    document.getElementById('theme-modal-title').textContent = '主题管理';
+  } catch(e) {
+    alert('JSON 解析失败：' + e.message);
+  }
+}
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   Notion Integration
+═══════════════════════════════════════════════════════════ */
+
+function notionRichTextToMd(richTexts) {
+  if (!richTexts || !richTexts.length) return '';
+  return richTexts.map(rt => {
+    let text = rt.plain_text || '';
+    if (!text) return '';
+    const a = rt.annotations || {};
+    // Order matters: code first (don't nest bold inside code)
+    if (a.code)          text = '`' + text + '`';
+    else {
+      if (a.bold)          text = '**' + text + '**';
+      if (a.italic)        text = '*' + text + '*';
+      if (a.strikethrough) text = '~~' + text + '~~';
+    }
+    if (rt.href)         text = '[' + text + '](' + rt.href + ')';
+    return text;
+  }).join('');
+}
+
+function notionBlocksToMd(blocks) {
+  let md = '';
+  let prevListType = null;
+
+  for (const block of blocks) {
+    const type = block.type;
+    const isList = type === 'bulleted_list_item' || type === 'numbered_list_item';
+    if (!isList && prevListType) { md += '\n'; prevListType = null; }
+
+    switch (type) {
+      case 'paragraph': {
+        const t = notionRichTextToMd(block.paragraph?.rich_text);
+        md += (t || '') + '\n\n';
+        break;
+      }
+      case 'heading_1':
+        md += '# ' + notionRichTextToMd(block.heading_1?.rich_text) + '\n\n';
+        break;
+      case 'heading_2':
+        md += '## ' + notionRichTextToMd(block.heading_2?.rich_text) + '\n\n';
+        break;
+      case 'heading_3':
+        md += '### ' + notionRichTextToMd(block.heading_3?.rich_text) + '\n\n';
+        break;
+      case 'bulleted_list_item':
+        prevListType = 'ul';
+        md += '- ' + notionRichTextToMd(block.bulleted_list_item?.rich_text) + '\n';
+        break;
+      case 'numbered_list_item':
+        prevListType = 'ol';
+        md += '1. ' + notionRichTextToMd(block.numbered_list_item?.rich_text) + '\n';
+        break;
+      case 'to_do': {
+        const checked = block.to_do?.checked ? '[x]' : '[ ]';
+        md += '- ' + checked + ' ' + notionRichTextToMd(block.to_do?.rich_text) + '\n';
+        prevListType = 'ul';
+        break;
+      }
+      case 'toggle':
+        md += '- ' + notionRichTextToMd(block.toggle?.rich_text) + '\n';
+        prevListType = 'ul';
+        break;
+      case 'code': {
+        const lang = block.code?.language || '';
+        const code = notionRichTextToMd(block.code?.rich_text);
+        md += '```' + lang + '\n' + code + '\n```\n\n';
+        break;
+      }
+      case 'quote':
+        md += '> ' + notionRichTextToMd(block.quote?.rich_text) + '\n\n';
+        break;
+      case 'callout': {
+        const icon = block.callout?.icon?.emoji ? block.callout.icon.emoji + ' ' : '';
+        md += '> ' + icon + notionRichTextToMd(block.callout?.rich_text) + '\n\n';
+        break;
+      }
+      case 'divider':
+        md += '---\n\n';
+        break;
+      case 'image': {
+        const imgUrl = block.image?.type === 'external'
+          ? block.image.external?.url
+          : block.image?.file?.url;
+        const caption = notionRichTextToMd(block.image?.caption) || '图片';
+        if (imgUrl) md += `![${caption}](${imgUrl})\n\n`;
+        break;
+      }
+      case 'equation':
+        md += '`' + (block.equation?.expression || '') + '`\n\n';
+        break;
+      case 'table':
+        // Table rows come as child blocks; simplified placeholder
+        md += '_[表格 - 请参考原始 Notion 页面]_\n\n';
+        break;
+      default:
+        break;
+    }
+  }
+  if (prevListType) md += '\n';
+  return md;
+}
+
+function extractNotionPageId(input) {
+  input = (input || '').trim();
+  // UUID with dashes: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  const uuid = input.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
+  if (uuid) return uuid[1].replace(/-/g, '');
+  // Plain 32-char hex (possibly at end of URL)
+  const hex32 = input.match(/([a-f0-9]{32})(?:\?|$|#)/i) || input.match(/([a-f0-9]{32})/i);
+  if (hex32) return hex32[1];
+  return input;
+}
+
+function setNotionStatus(msg, type) {
+  const el = document.getElementById('notion-status');
+  el.textContent = msg;
+  el.className = 'ns show ' + type;
+}
+
+async function fetchNotion() {
+  const token    = document.getElementById('notion-token').value.trim();
+  const pageInput = document.getElementById('notion-page').value.trim();
+  const proxyRaw  = document.getElementById('notion-proxy').value.trim();
+  const autoCopy  = document.getElementById('notion-auto-copy').checked;
+
+  if (!token)     { setNotionStatus('请输入 Integration Token', 'err'); return; }
+  if (!pageInput) { setNotionStatus('请输入页面 URL 或 ID', 'err'); return; }
+
+  const pageId = extractNotionPageId(pageInput);
+  if (pageId.length < 10) { setNotionStatus('无法识别页面 ID，请检查输入', 'err'); return; }
+
+  setNotionStatus('连接 Notion 中…', 'loading');
+  const fetchBtn = document.getElementById('notion-fetch-btn');
+  fetchBtn.disabled = true;
+
+  // persist token / proxy
+  localStorage.setItem('notion_token', token);
+  if (proxyRaw) localStorage.setItem('notion_proxy', proxyRaw);
+
+  // Build base URL.  proxy may be: "https://corsproxy.io/?url=" or "http://localhost:3100/"
+  // We'll encode the target URL if proxy ends with "url="
+  function buildUrl(notionPath) {
+    const target = 'https://api.notion.com/v1' + notionPath;
+    if (!proxyRaw) return target;
+    if (proxyRaw.toLowerCase().endsWith('url=')) return proxyRaw + encodeURIComponent(target);
+    return proxyRaw.replace(/\/$/, '') + '/' + target.replace('https://', '');
+  }
+
+  const headers = {
+    'Authorization': 'Bearer ' + token,
+    'Notion-Version': '2022-06-28',
+  };
+
+  try {
+    // 1. Verify page exists
+    const pageRes = await fetch(buildUrl('/pages/' + pageId), { headers });
+    if (!pageRes.ok) {
+      const err = await pageRes.json().catch(() => ({}));
+      throw new Error(err.message || 'HTTP ' + pageRes.status + ' — 请确认页面已分享给该 Integration');
+    }
+    const pageData = await pageRes.json();
+    const pageTitle = pageData.properties?.title?.title?.[0]?.plain_text
+      || pageData.properties?.Name?.title?.[0]?.plain_text
+      || '未命名';
+
+    setNotionStatus('已找到页面「' + pageTitle + '」，正在获取内容…', 'loading');
+
+    // 2. Fetch all blocks (paginated)
+    let allBlocks = [];
+    let cursor;
+    do {
+      const path = '/blocks/' + pageId + '/children?page_size=100' + (cursor ? '&start_cursor=' + cursor : '');
+      const res = await fetch(buildUrl(path), { headers });
+      if (!res.ok) throw new Error('获取块内容失败 HTTP ' + res.status);
+      const data = await res.json();
+      allBlocks = allBlocks.concat(data.results || []);
+      cursor = data.has_more ? data.next_cursor : undefined;
+    } while (cursor);
+
+    if (!allBlocks.length) {
+      setNotionStatus('页面内容为空', 'err');
+      fetchBtn.disabled = false;
+      return;
+    }
+
+    // 3. Convert blocks to Markdown
+    let md = '# ' + pageTitle + '\n\n' + notionBlocksToMd(allBlocks);
+
+    // 4. Load into editor and render
+    editor.value = md;
+    render();
+    setNotionStatus(`✓ 已导入 ${allBlocks.length} 个块，共 ${md.length} 字符`, 'ok');
+
+    // 5. Optionally auto-copy rich text
+    if (autoCopy) {
+      await copyRichText();
+    }
+
+    setTimeout(() => closeModal('notion-modal'), 1800);
+  } catch (e) {
+    let msg = e.message || '未知错误';
+    if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('cors') || msg.toLowerCase().includes('networkerror')) {
+      msg = '跨域请求被拦截（CORS）。\n请在上方填入 CORS 代理前缀，例如：https://corsproxy.io/?url=\n或安装浏览器 CORS 插件后重试。';
+    }
+    setNotionStatus('错误：' + msg, 'err');
+  } finally {
+    fetchBtn.disabled = false;
+  }
+}
 </script>
 </body>
 </html>
