@@ -13,7 +13,7 @@
 ### 下载
 
 ```bash
-git clone <仓库地址>
+git clone https://github.com/xuyinghan02-cell/markdown-transfer-weixin
 ```
 
 或直接下载 `standalone.html` 单文件（包含所有依赖，离线可用）。
@@ -49,7 +49,7 @@ git clone <仓库地址>
 
 ```bash
 # 1. 克隆仓库
-git clone <仓库地址>
+git clone https://github.com/xuyinghan02-cell/markdown-transfer-weixin
 
 # 2. 进入 mcp 目录安装依赖
 cd markdown-transfer-weixin/mcp
