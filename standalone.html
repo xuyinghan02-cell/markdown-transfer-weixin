@@ -1450,6 +1450,18 @@ function showExtractPanel() {
 
   bd.innerHTML = `
     <p class="fhint" style="margin-bottom:10px;">分析公众号文章的排版样式，自动生成匹配的自定义主题，再手动微调后保存。</p>
+
+    <div class="fgrid" style="margin-bottom:10px;">
+      <div class="fg">
+        <label class="fl">继承基础主题 <span style="color:var(--text-muted,#888);font-weight:normal;">（决定未提取到的元素的默认排版）</span></label>
+        <select class="fi" id="wx-base-select">
+          <option value="default" selected>默认简洁（推荐）</option>
+          <option value="tech">科技感</option>
+          <option value="literary">文艺清新</option>
+        </select>
+      </div>
+    </div>
+
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab(this,'ext-tab-html')">粘贴 HTML（推荐）</button>
       <button class="tab-btn" onclick="switchTab(this,'ext-tab-url')">输入文章链接</button>
@@ -1523,7 +1535,8 @@ function doExtractWxTheme() {
   }
   errEl.textContent = '';
   try {
-    const extracted = extractThemeFromHtml(html);
+    const base = document.getElementById('wx-base-select')?.value || 'default';
+    const extracted = extractThemeFromHtml(html, base);
     showThemeEditor(null, extracted);
     showToast('✓ 样式已提取，调整后点击「保存主题」');
   } catch (e) {
@@ -1534,9 +1547,10 @@ function doExtractWxTheme() {
 /**
  * Parse WeChat article HTML and extract theme vars + style overrides.
  * @param {string} html - Full article HTML source
+ * @param {string} base - Base theme to inherit ('default' | 'tech' | 'literary')
  * @returns {{ name, base, vars, styleOverrides }}
  */
-function extractThemeFromHtml(html) {
+function extractThemeFromHtml(html, base = 'default') {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
@@ -1652,7 +1666,7 @@ function extractThemeFromHtml(html) {
 
   return {
     name,
-    base: 'default',
+    base,
     vars: {
       accentColor,
       textColor,
