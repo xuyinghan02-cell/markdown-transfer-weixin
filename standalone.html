@@ -1592,117 +1592,297 @@ function doExtractWxTheme() {
  * @param {string} base - Base theme to inherit ('default' | 'tech' | 'literary')
  * @returns {{ name, base, vars, styleOverrides }}
  */
+/* ═══════════════════════════════════════════════════════════
+   WeChat Article Theme Extractor
+   支持两种样式来源：
+   1. 内联 style="" 属性（传统公众号）
+   2. <style> 块中的 CSS 类 + CSS 自定义属性（现代模板）
+═══════════════════════════════════════════════════════════ */
+
+// ── CSS 变量解析 ───────────────────────────────────────────────
+function _parseCssVars(cssText) {
+  const vars = {};
+  const root = cssText.match(/:root\s*\{([^}]+)\}/s);
+  if (root) {
+    for (const m of root[1].matchAll(/--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g)) {
+      vars['--' + m[1].trim()] = m[2].trim();
+    }
+  }
+  return vars;
+}
+
+function _resolveVars(value, vars, depth = 0) {
+  if (!value || depth > 5 || !value.includes('var(')) return value;
+  return value.replace(/var\(\s*(--[\w-]+)(?:\s*,\s*([^)]+))?\s*\)/g, (_, name, fallback) => {
+    const resolved = vars[name];
+    if (resolved) return _resolveVars(resolved, vars, depth + 1);
+    return fallback ? fallback.trim() : name;
+  });
+}
+
+// ── CSS 规则解析 ───────────────────────────────────────────────
+function _parseCssRules(cssText, vars) {
+  const rules = {};
+  // 去除注释、@font-face、@keyframes、@media（简化处理）
+  const cleaned = cssText
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/@(?:font-face|keyframes)[^{]*\{[^}]*\}/g, '')
+    .replace(/@media[^{]+\{[\s\S]*?\}\s*\}/g, '');
+
+  const ruleRe = /([^{@\n][^{]*?)\{([^}]*)\}/g;
+  let m;
+  while ((m = ruleRe.exec(cleaned)) !== null) {
+    const props = {};
+    for (const pm of m[2].matchAll(/([\w-]+)\s*:\s*([^;!]+?)(?:\s*!important)?\s*;/g)) {
+      props[pm[1].trim()] = _resolveVars(pm[2].trim(), vars);
+    }
+    if (!Object.keys(props).length) continue;
+    for (const rawSel of m[1].split(',')) {
+      const sel = rawSel.trim();
+      // 跳过包含子选择器、伪类（保留 ::before 单独存）
+      if (!sel) continue;
+      rules[sel] = Object.assign({}, rules[sel] || {}, props);
+    }
+  }
+  return rules;
+}
+
+// ── 获取元素的有效样式属性 ─────────────────────────────────────
+// 优先级：内联 style > class 规则 > 标签规则
+function _getProps(el, rules) {
+  const p = {};
+  // 1. 标签名规则
+  Object.assign(p, rules[el.tagName.toLowerCase()] || {});
+  // 2. CSS 类规则（按 className 顺序）
+  if (el.className && typeof el.className === 'string') {
+    for (const cls of el.className.trim().split(/\s+/)) {
+      if (!cls) continue;
+      Object.assign(p, rules['.' + cls] || {});
+      Object.assign(p, rules[el.tagName.toLowerCase() + '.' + cls] || {});
+    }
+  }
+  // 3. 内联 style（最高优先级）
+  if (el.style?.cssText) {
+    for (const decl of el.style.cssText.split(';')) {
+      const i = decl.indexOf(':');
+      if (i < 0) continue;
+      const k = decl.slice(0, i).trim(), v = decl.slice(i + 1).trim();
+      if (k && v) p[k] = v;
+    }
+  }
+  return p;
+}
+
+// ── ::before 提取（用于将竖条装饰转为 border-left）─────────────
+function _getBeforeProps(el, rules) {
+  if (!el?.className) return {};
+  for (const cls of el.className.trim().split(/\s+/)) {
+    if (!cls) continue;
+    const r = rules['.' + cls + '::before'] || rules[el.tagName.toLowerCase() + '.' + cls + '::before'];
+    if (r) return r;
+  }
+  return {};
+}
+
+// ── 颜色归一化 → #rrggbb ──────────────────────────────────────
+function _toHex(colorStr) {
+  if (!colorStr) return null;
+  colorStr = colorStr.trim();
+  const skip = ['transparent', 'inherit', 'initial', 'unset', 'currentcolor', 'currentColor'];
+  if (!colorStr || skip.includes(colorStr.toLowerCase())) return null;
+  if (/^#[0-9a-f]{6}$/i.test(colorStr)) return colorStr.toLowerCase();
+  if (/^#[0-9a-f]{3}$/i.test(colorStr)) {
+    const [, r, g, b] = colorStr;
+    return ('#' + r + r + g + g + b + b).toLowerCase();
+  }
+  const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  if (m) return '#' + [m[1], m[2], m[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+  return null;
+}
+
+// ── 将属性对象序列化为 inline CSS 字符串 ─────────────────────────
+// allowList 控制允许哪些属性，保证微信兼容性（无 flex/grid/var/::before）
+const _BLOCK_ALLOW = [
+  'font-family', 'font-size', 'font-weight', 'font-style', 'color',
+  'line-height', 'text-align', 'text-indent', 'letter-spacing',
+  'margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
+  'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right',
+  'border-left', 'border-right', 'border-top', 'border-bottom', 'border-radius',
+  'background-color', 'text-decoration', 'text-transform',
+];
+const _INLINE_ALLOW = [
+  'font-family', 'font-size', 'font-weight', 'font-style', 'color',
+  'background-color', 'padding', 'padding-left', 'padding-right',
+  'padding-top', 'padding-bottom', 'border-radius', 'border',
+  'text-decoration',
+];
+
+function _buildCss(props, allowList, forceBlock = true) {
+  const parts = forceBlock ? ['display: block'] : [];
+  for (const key of allowList) {
+    const val = props[key];
+    if (val && !val.includes('var(') && !val.includes('calc(')) {
+      parts.push(`${key}: ${val}`);
+    }
+  }
+  return parts.join('; ') + ';';
+}
+
+// ── 主提取函数 ────────────────────────────────────────────────
+/**
+ * 从公众号文章 HTML 中提取主题样式。
+ * 同时支持内联 style="" 和 <style> 块中的 CSS 类 + CSS 变量。
+ */
 function extractThemeFromHtml(html, base = 'default') {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
-  // WeChat article content container
+  // 收集所有 <style> 内容
+  let rawCss = '';
+  doc.querySelectorAll('style').forEach(s => { rawCss += s.textContent + '\n'; });
+
+  const cssVars  = _parseCssVars(rawCss);
+  const cssRules = rawCss ? _parseCssRules(rawCss, cssVars) : {};
+
+  // 内容容器（优先公众号主体，其次 body）
   const content =
     doc.querySelector('#js_content') ||
     doc.querySelector('.rich_media_content') ||
     doc.querySelector('article') ||
     doc.body;
 
-  function all(tag) {
-    return Array.from(content.querySelectorAll(tag));
-  }
-
-  // Normalize any color string to lowercase #rrggbb, or null
-  function toHex(colorStr) {
-    if (!colorStr) return null;
-    colorStr = colorStr.trim();
-    if (!colorStr || colorStr === 'transparent' || colorStr === 'inherit' || colorStr === 'initial') return null;
-    if (/^#[0-9a-f]{6}$/i.test(colorStr)) return colorStr.toLowerCase();
-    if (/^#[0-9a-f]{3}$/i.test(colorStr)) {
-      const [, r, g, b] = colorStr;
-      return ('#' + r + r + g + g + b + b).toLowerCase();
-    }
-    const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-    if (m) {
-      return '#' + [m[1], m[2], m[3]]
-        .map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+  // 查找代表性元素
+  function first(...sels) {
+    for (const s of sels) {
+      const el = content.querySelector(s);
+      if (el) return el;
     }
     return null;
   }
 
-  // Find the most representative paragraph/section
-  const pEls = all('p, section').filter(el =>
-    el.style.cssText && el.textContent.trim().length > 10
-  );
-  const firstP = pEls[0] || null;
+  const pEl  = first('p.p', '.p', 'p');
+  const h1El = first('.h1', 'h1');
+  const h2El = first('.h2', 'h2');
+  const h3El = first('.h3', 'h3');
+  const bqEl = first('.blockquote', 'blockquote');
+  const codeEl  = first('code');
+  const preEl   = first('.code-block', '.code-body', 'pre');
+  const linkEl  = first('a');
+  const tableEl = first('table');
+  const thEl    = first('th, thead td');
+  const tdEl    = first('tbody td');
+  const hrEl    = first('hr');
 
-  // Font size
-  let fontSize = 15;
-  if (firstP?.style.fontSize) {
-    const v = parseInt(firstP.style.fontSize);
-    if (v >= 10 && v <= 30) fontSize = v;
+  const pP   = pEl  ? _getProps(pEl,  cssRules) : {};
+  const h1P  = h1El ? _getProps(h1El, cssRules) : {};
+  const h2P  = h2El ? _getProps(h2El, cssRules) : {};
+  const h3P  = h3El ? _getProps(h3El, cssRules) : {};
+  const bqP  = bqEl ? _getProps(bqEl, cssRules) : {};
+  const codeP = codeEl ? _getProps(codeEl, cssRules) : {};
+  const preP  = preEl  ? _getProps(preEl,  cssRules) : {};
+  const linkP = linkEl ? _getProps(linkEl, cssRules) : {};
+  const thP   = thEl  ? _getProps(thEl,   cssRules) : {};
+  const tdP   = tdEl  ? _getProps(tdEl,   cssRules) : {};
+  const hrP   = hrEl  ? _getProps(hrEl,   cssRules) : {};
+
+  // h2 的竖条装饰可能来自 ::before，将其转为 border-left
+  const h2Before = h2El ? _getBeforeProps(h2El, cssRules) : {};
+  if (!h2P['border-left'] && h2Before['background'] || h2Before['background-color']) {
+    const barColor = h2Before['background'] || h2Before['background-color'];
+    const barWidth = h2Before['width'] || '4px';
+    h2P['border-left'] = `${barWidth} solid ${barColor}`;
+    h2P['padding-left'] = h2P['padding-left'] || '12px';
+    delete h2P['display']; // 去掉可能的 flex
   }
 
-  // Line height (may be "1.75em", "1.75", "28px", etc.)
+  // ── 提取 vars ───────────────────────────────────────────────
+
+  // 主色：CSS 变量 → 链接色 → 边框色
+  let accentColor = '#07c160';
+  const accentFromVar = _toHex(cssVars['--accent'] || cssVars['--accent-color'] || cssVars['--primary']);
+  if (accentFromVar) {
+    accentColor = accentFromVar;
+  } else if (linkP['color']) {
+    const c = _toHex(linkP['color']);
+    if (c) accentColor = c;
+  } else {
+    const borderColor = h2P['border-left']?.match(/#[0-9a-f]{3,6}/i)?.[0];
+    if (borderColor) accentColor = borderColor.toLowerCase();
+  }
+
+  // 正文色
+  let textColor = '#333333';
+  const tcSrc = pP['color'] || cssVars['--ink-light'] || cssVars['--text'] || cssVars['--ink'];
+  const tcHex = _toHex(tcSrc);
+  if (tcHex) textColor = tcHex;
+
+  // 辅助色
+  let mutedColor = '#666666';
+  const muteSrc = cssVars['--ink-mute'] || cssVars['--muted'] || cssVars['--text-muted'] || bqP['color'];
+  const muteHex = _toHex(muteSrc);
+  if (muteHex) mutedColor = muteHex;
+
+  // 字号
+  let fontSize = 15;
+  const fsSrc = pP['font-size'];
+  if (fsSrc) { const v = parseFloat(fsSrc); if (v >= 10 && v <= 30) fontSize = Math.round(v); }
+
+  // 行高
   let lineHeight = 1.75;
-  if (firstP?.style.lineHeight) {
-    const lhStr = firstP.style.lineHeight;
-    const lhNum = parseFloat(lhStr);
+  const lhSrc = pP['line-height'];
+  if (lhSrc) {
+    const lhNum = parseFloat(lhSrc);
     if (!isNaN(lhNum)) {
-      lineHeight = lhStr.includes('px')
+      lineHeight = lhSrc.includes('px')
         ? Math.round((lhNum / fontSize) * 100) / 100
         : Math.round(lhNum * 100) / 100;
       if (lineHeight < 1 || lineHeight > 3) lineHeight = 1.75;
     }
   }
 
-  // Text color
-  let textColor = '#333333';
-  if (firstP?.style.color) {
-    const c = toHex(firstP.style.color);
-    if (c) textColor = c;
-  }
+  // 字体
+  let fontFamily = pP['font-family'] || cssVars['--font-sans'] || cssVars['--font-body'] || '';
 
-  // Font family
-  let fontFamily = '';
-  if (firstP?.style.fontFamily) {
-    fontFamily = firstP.style.fontFamily.trim();
-  }
+  // ── 构建 styleOverrides ────────────────────────────────────
 
-  // Accent color: links first, then headings/strong
-  let accentColor = '#07c160';
-  const linkEls = all('a').filter(el => el.style.color);
-  if (linkEls.length > 0) {
-    const c = toHex(linkEls[0].style.color);
-    if (c && c !== textColor) accentColor = c;
-  } else {
-    const headEls = all('h1, h2, h3, strong').filter(el => el.style.color);
-    if (headEls.length > 0) {
-      const c = toHex(headEls[0].style.color);
-      if (c && c !== textColor) accentColor = c;
-    }
-  }
-
-  // Muted color: blockquote or secondary spans
-  let mutedColor = '#666666';
-  const bqEls = all('blockquote').filter(el => el.style.color);
-  if (bqEls.length > 0) {
-    const c = toHex(bqEls[0].style.color);
-    if (c) mutedColor = c;
-  }
-
-  // Build styleOverrides from representative elements' inline styles
   const styleOverrides = {};
-  const tagMap = {
-    h1: all('h1').find(el => el.style.cssText),
-    h2: all('h2').find(el => el.style.cssText),
-    h3: all('h3').find(el => el.style.cssText),
-    p: firstP,
-    blockquote: all('blockquote').find(el => el.style.cssText),
-  };
-  Object.entries(tagMap).forEach(([tag, el]) => {
-    if (!el?.style?.cssText) return;
-    const cleaned = el.style.cssText.trim().replace(/\s+/g, ' ');
-    if (cleaned) styleOverrides[tag] = cleaned;
-  });
 
-  // Infer a theme name from the article title if available
-  const titleEl = doc.querySelector('h1.rich_media_title, .rich_media_title, h1');
+  if (Object.keys(h1P).length) {
+    styleOverrides.h1 = _buildCss(h1P, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(h2P).length) {
+    styleOverrides.h2 = _buildCss(h2P, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(h3P).length) {
+    styleOverrides.h3 = _buildCss(h3P, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(pP).length) {
+    styleOverrides.p = _buildCss(pP, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(bqP).length) {
+    styleOverrides.blockquote = _buildCss(bqP, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(codeP).length) {
+    styleOverrides.inlineCode = _buildCss(codeP, _INLINE_ALLOW, false);
+  }
+  if (Object.keys(preP).length) {
+    styleOverrides.pre = _buildCss(preP, _BLOCK_ALLOW, true);
+  }
+  if (Object.keys(linkP).length) {
+    styleOverrides.a = _buildCss(linkP, _INLINE_ALLOW, false);
+  }
+  if (Object.keys(thP).length) {
+    styleOverrides.th = _buildCss(thP, _BLOCK_ALLOW, false);
+  }
+  if (Object.keys(tdP).length) {
+    styleOverrides.td = _buildCss(tdP, _BLOCK_ALLOW, false);
+  }
+  if (Object.keys(hrP).length) {
+    styleOverrides.hr = _buildCss(hrP, _BLOCK_ALLOW, true);
+  }
+
+  // 文章标题推断主题名
+  const titleEl = doc.querySelector('h1.rich_media_title, .rich_media_title, .cover-title, h1');
   const articleTitle = titleEl?.textContent?.trim() || '';
   const name = articleTitle ? articleTitle.slice(0, 20) + ' 风格' : '公众号提取';
 
