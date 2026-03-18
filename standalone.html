@@ -1219,6 +1219,7 @@ function renderThemeList() {
   bd.innerHTML = html;
   ft.innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('theme-modal')">关闭</button>
+    <button class="btn btn-secondary" onclick="showExtractPanel()">从公众号提取</button>
     <button class="btn btn-primary" onclick="showThemeEditor(null)">+ 新建主题</button>
   `;
 }
@@ -1230,9 +1231,10 @@ function escHtml(s) {
 /**
  * Show theme editor.
  * key=null → create new; key=string → edit existing custom theme
+ * preData → optional pre-fill data (e.g. extracted from a WeChat article)
  */
-function showThemeEditor(key) {
-  const existing = key ? customThemes[key] : null;
+function showThemeEditor(key, preData) {
+  const existing = key ? customThemes[key] : (preData || null);
   const base = existing?.base || 'default';
   const vars = existing?.vars || {};
   const overridesJson = existing?.styleOverrides ? JSON.stringify(existing.styleOverrides, null, 2) : '{}';
@@ -1437,6 +1439,230 @@ function importThemeJson() {
   } catch(e) {
     alert('JSON 解析失败：' + e.message);
   }
+}
+
+// ── 从公众号文章提取主题 ──────────────────────────────────────
+
+function showExtractPanel() {
+  document.getElementById('theme-modal-title').textContent = '从公众号文章提取主题';
+  const bd = document.getElementById('theme-modal-bd');
+  const ft = document.getElementById('theme-modal-ft');
+
+  bd.innerHTML = `
+    <p class="fhint" style="margin-bottom:10px;">分析公众号文章的排版样式，自动生成匹配的自定义主题，再手动微调后保存。</p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'ext-tab-html')">粘贴 HTML（推荐）</button>
+      <button class="tab-btn" onclick="switchTab(this,'ext-tab-url')">输入文章链接</button>
+    </div>
+
+    <div class="tab-pane active" id="ext-tab-html">
+      <div class="fg">
+        <label class="fl">粘贴文章 HTML 源码</label>
+        <div class="fhint">在浏览器打开公众号文章 → 按 <b>Ctrl+U</b>（Mac: <b>⌘+U</b>）查看源码 → 全选（Ctrl+A）→ 复制后粘贴到下方</div>
+        <textarea class="fi" id="wx-html-input" rows="10" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;..." style="font-family:monospace;font-size:11px;margin-top:6px;"></textarea>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="ext-tab-url">
+      <div class="fg">
+        <label class="fl">文章链接</label>
+        <input class="fi" id="wx-url-input" placeholder="https://mp.weixin.qq.com/s/...">
+      </div>
+      <div class="fg">
+        <label class="fl">CORS 代理前缀（可选）</label>
+        <input class="fi" id="wx-proxy-input" placeholder="例：https://corsproxy.io/?url=">
+        <div class="fhint">浏览器直连微信服务器会被 CORS 拦截，建议配置代理或改用「粘贴 HTML」方式。</div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:6px;font-size:12px" onclick="fetchWxArticle()">获取文章 HTML</button>
+      <div id="wx-fetch-status" style="font-size:12px;margin-top:8px;"></div>
+    </div>
+
+    <div id="wx-extract-status" style="font-size:12px;margin-top:8px;color:#e74c3c;"></div>
+  `;
+
+  ft.innerHTML = `
+    <button class="btn btn-secondary" onclick="renderThemeList(); document.getElementById('theme-modal-title').textContent='主题管理';">← 返回</button>
+    <button class="btn btn-primary" onclick="doExtractWxTheme()">提取主题样式 →</button>
+  `;
+}
+
+async function fetchWxArticle() {
+  const url = document.getElementById('wx-url-input').value.trim();
+  const proxy = document.getElementById('wx-proxy-input').value.trim();
+  const status = document.getElementById('wx-fetch-status');
+  if (!url) { status.textContent = '请输入文章链接'; return; }
+  const fetchUrl = proxy ? proxy + encodeURIComponent(url) : url;
+  status.style.color = 'var(--text-muted, #888)';
+  status.textContent = '正在获取…';
+  try {
+    const res = await fetch(fetchUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    document.getElementById('wx-html-input').value = text;
+    // Switch to HTML tab
+    const allBtns  = document.querySelectorAll('#theme-modal-bd .tab-btn');
+    const allPanes = document.querySelectorAll('#theme-modal-bd .tab-pane');
+    allBtns.forEach(b => b.classList.remove('active'));
+    allPanes.forEach(p => p.classList.remove('active'));
+    allBtns[0].classList.add('active');
+    document.getElementById('ext-tab-html').classList.add('active');
+    status.style.color = '#07c160';
+    status.textContent = '✓ 获取成功，已粘贴到上方，点击「提取主题样式」继续';
+  } catch (e) {
+    status.style.color = '#e74c3c';
+    status.textContent = '获取失败：' + e.message + '。建议改用「粘贴 HTML」方式。';
+  }
+}
+
+function doExtractWxTheme() {
+  const html = document.getElementById('wx-html-input').value.trim();
+  const errEl = document.getElementById('wx-extract-status');
+  if (!html) {
+    errEl.textContent = '请先粘贴文章 HTML 源码，或通过链接获取';
+    return;
+  }
+  errEl.textContent = '';
+  try {
+    const extracted = extractThemeFromHtml(html);
+    showThemeEditor(null, extracted);
+    showToast('✓ 样式已提取，调整后点击「保存主题」');
+  } catch (e) {
+    errEl.textContent = '提取失败：' + e.message;
+  }
+}
+
+/**
+ * Parse WeChat article HTML and extract theme vars + style overrides.
+ * @param {string} html - Full article HTML source
+ * @returns {{ name, base, vars, styleOverrides }}
+ */
+function extractThemeFromHtml(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // WeChat article content container
+  const content =
+    doc.querySelector('#js_content') ||
+    doc.querySelector('.rich_media_content') ||
+    doc.querySelector('article') ||
+    doc.body;
+
+  function all(tag) {
+    return Array.from(content.querySelectorAll(tag));
+  }
+
+  // Normalize any color string to lowercase #rrggbb, or null
+  function toHex(colorStr) {
+    if (!colorStr) return null;
+    colorStr = colorStr.trim();
+    if (!colorStr || colorStr === 'transparent' || colorStr === 'inherit' || colorStr === 'initial') return null;
+    if (/^#[0-9a-f]{6}$/i.test(colorStr)) return colorStr.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(colorStr)) {
+      const [, r, g, b] = colorStr;
+      return ('#' + r + r + g + g + b + b).toLowerCase();
+    }
+    const m = colorStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (m) {
+      return '#' + [m[1], m[2], m[3]]
+        .map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+    }
+    return null;
+  }
+
+  // Find the most representative paragraph/section
+  const pEls = all('p, section').filter(el =>
+    el.style.cssText && el.textContent.trim().length > 10
+  );
+  const firstP = pEls[0] || null;
+
+  // Font size
+  let fontSize = 15;
+  if (firstP?.style.fontSize) {
+    const v = parseInt(firstP.style.fontSize);
+    if (v >= 10 && v <= 30) fontSize = v;
+  }
+
+  // Line height (may be "1.75em", "1.75", "28px", etc.)
+  let lineHeight = 1.75;
+  if (firstP?.style.lineHeight) {
+    const lhStr = firstP.style.lineHeight;
+    const lhNum = parseFloat(lhStr);
+    if (!isNaN(lhNum)) {
+      lineHeight = lhStr.includes('px')
+        ? Math.round((lhNum / fontSize) * 100) / 100
+        : Math.round(lhNum * 100) / 100;
+      if (lineHeight < 1 || lineHeight > 3) lineHeight = 1.75;
+    }
+  }
+
+  // Text color
+  let textColor = '#333333';
+  if (firstP?.style.color) {
+    const c = toHex(firstP.style.color);
+    if (c) textColor = c;
+  }
+
+  // Font family
+  let fontFamily = '';
+  if (firstP?.style.fontFamily) {
+    fontFamily = firstP.style.fontFamily.trim();
+  }
+
+  // Accent color: links first, then headings/strong
+  let accentColor = '#07c160';
+  const linkEls = all('a').filter(el => el.style.color);
+  if (linkEls.length > 0) {
+    const c = toHex(linkEls[0].style.color);
+    if (c && c !== textColor) accentColor = c;
+  } else {
+    const headEls = all('h1, h2, h3, strong').filter(el => el.style.color);
+    if (headEls.length > 0) {
+      const c = toHex(headEls[0].style.color);
+      if (c && c !== textColor) accentColor = c;
+    }
+  }
+
+  // Muted color: blockquote or secondary spans
+  let mutedColor = '#666666';
+  const bqEls = all('blockquote').filter(el => el.style.color);
+  if (bqEls.length > 0) {
+    const c = toHex(bqEls[0].style.color);
+    if (c) mutedColor = c;
+  }
+
+  // Build styleOverrides from representative elements' inline styles
+  const styleOverrides = {};
+  const tagMap = {
+    h1: all('h1').find(el => el.style.cssText),
+    h2: all('h2').find(el => el.style.cssText),
+    h3: all('h3').find(el => el.style.cssText),
+    p: firstP,
+    blockquote: all('blockquote').find(el => el.style.cssText),
+  };
+  Object.entries(tagMap).forEach(([tag, el]) => {
+    if (!el?.style?.cssText) return;
+    const cleaned = el.style.cssText.trim().replace(/\s+/g, ' ');
+    if (cleaned) styleOverrides[tag] = cleaned;
+  });
+
+  // Infer a theme name from the article title if available
+  const titleEl = doc.querySelector('h1.rich_media_title, .rich_media_title, h1');
+  const articleTitle = titleEl?.textContent?.trim() || '';
+  const name = articleTitle ? articleTitle.slice(0, 20) + ' 风格' : '公众号提取';
+
+  return {
+    name,
+    base: 'default',
+    vars: {
+      accentColor,
+      textColor,
+      mutedColor,
+      fontSize,
+      lineHeight,
+      ...(fontFamily ? { fontFamily } : {}),
+    },
+    styleOverrides,
+  };
 }
 </script>
 
