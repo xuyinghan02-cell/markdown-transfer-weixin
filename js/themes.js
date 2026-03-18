@@ -128,7 +128,7 @@ const THEMES = {
     name: '现代杂志',
     vars: {
       accentColor: '#c0392b',
-      fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
+      fontFamily: "'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif",
       fontSize: 15,
       lineHeight: 1.85,
       textColor: '#4a4a4a',
@@ -137,8 +137,9 @@ const THEMES = {
     styles(vars) {
       return {
         wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word; -webkit-text-size-adjust: 100%;`,
-        h1: `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 16px 0; line-height: 1.4; padding-bottom: 18px; background-image: linear-gradient(#1a1a1a, #1a1a1a), linear-gradient(${vars.accentColor}, ${vars.accentColor}); background-repeat: no-repeat; background-size: 100% 2px, 40px 2px; background-position: 0 calc(100% - 8px), 0 100%;`,
-        h2: `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 5px solid ${vars.accentColor}; padding-left: 12px;`,
+        h1: `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 8px 0; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid #1a1a1a;`,
+        h1Decoration: `<span style="display:block;width:40px;height:2px;background-color:${vars.accentColor};margin-top:6px;margin-bottom:8px;"></span>`,
+        h2: `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 5px solid ${vars.accentColor}; padding-left: 12px;`,
         h3: `display: block; font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 28px 0 10px 0; line-height: 1.4; letter-spacing: 0.03em;`,
         h4: `display: block; font-size: ${vars.fontSize}px; font-weight: 600; color: #1a1a1a; margin: 20px 0 8px 0; line-height: 1.4;`,
         h5: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: 600; color: #4a4a4a; margin: 16px 0 6px 0; line-height: 1.4;`,
@@ -147,10 +148,10 @@ const THEMES = {
         strong: `font-weight: 700; color: #1a1a1a;`,
         em: `font-style: italic; color: ${vars.accentColor};`,
         del: `text-decoration: line-through; color: #aaaaaa;`,
-        inlineCode: `font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; font-size: 13px; background-color: #f4f3f0; color: ${vars.accentColor}; padding: 1px 6px; border-radius: 3px; border: 1px solid #d8d5d0;`,
+        inlineCode: `font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; font-size: 13px; background-color: #f4f3f0; color: ${vars.accentColor}; padding: 1px 6px; border-radius: 3px; border: 1px solid #d8d5d0;`,
         codeHeader: `display: block; background-color: #2d2d2d; padding: 10px 16px; border-radius: 8px 8px 0 0;`,
         pre: `display: block; background-color: #1e1e1e; border-radius: 0 0 8px 8px; padding: 20px; margin: 0; overflow-x: auto;`,
-        preCode: `background-color: transparent; padding: 0; font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; font-size: 13.5px; line-height: 1.7; color: #d4d4d4; white-space: pre;`,
+        preCode: `background-color: transparent; padding: 0; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; font-size: 13.5px; line-height: 1.7; color: #d4d4d4; white-space: pre;`,
         blockquote: `display: block; border-left: 3px solid ${vars.accentColor}; padding: 18px 22px; margin: 28px 0; background-color: #f6f4f1; color: #555555; font-style: italic; border-radius: 0 4px 4px 0;`,
         ul: `display: block; padding-left: 22px; margin: 20px 0;`,
         ol: `display: block; padding-left: 24px; margin: 20px 0;`,

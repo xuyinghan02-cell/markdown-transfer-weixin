@@ -17,6 +17,9 @@ function createRenderer(styles) {
   // 标题
   renderer.heading = function (text, level) {
     const style = styles[`h${level}`] || styles.h6;
+    if (level === 1 && styles.h1Decoration) {
+      return `<h1 style="${style}">${text}${styles.h1Decoration}</h1>\n`;
+    }
     return `<h${level} style="${style}">${text}</h${level}>\n`;
   };
 
