@@ -53,6 +53,15 @@ function createRenderer(styles) {
   renderer.code = function (code, infostring) {
     const escaped = escapeHtml(code);
     const lang = infostring ? infostring.split(/\s+/)[0] : '';
+    if (styles.codeHeader) {
+      const dots = [
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff5f56;margin-right:5px;vertical-align:middle;"></span>`,
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffbd2e;margin-right:5px;vertical-align:middle;"></span>`,
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27c93f;vertical-align:middle;"></span>`,
+      ].join('');
+      const langLabel = lang ? `<span style="float:right;font-family:monospace;font-size:11px;color:#999;text-transform:uppercase;">${lang}</span>` : '';
+      return `<section style="margin:28px 0;overflow:hidden;border-radius:8px;">\n<section style="${styles.codeHeader}">${langLabel}${dots}</section>\n<pre style="${styles.pre}"><code style="${styles.preCode}">${escaped}</code></pre>\n</section>\n`;
+    }
     const langLabel = lang
       ? `<span style="display:block;font-size:11px;color:#999;margin-bottom:8px;font-family:sans-serif;">${lang}</span>`
       : '';
@@ -61,7 +70,11 @@ function createRenderer(styles) {
 
   // 引用块
   renderer.blockquote = function (quote) {
-    return `<blockquote style="${styles.blockquote}">${quote}</blockquote>\n`;
+    const needsItalic = styles.blockquote && styles.blockquote.includes('font-style: italic');
+    const processedQ = needsItalic
+      ? quote.replace(/<p style="([^"]*)">/g, (_, s) => `<p style="${s}${s.endsWith(';') ? '' : ';'} font-style: italic;">`)
+      : quote;
+    return `<blockquote style="${styles.blockquote}">${processedQ}</blockquote>\n`;
   };
 
   // 列表

@@ -161,8 +161,8 @@ const THEMES = {
     styles(v) {
       return {
         wrapper:     `font-family: ${v.fontFamily}; font-size: ${v.fontSize}px; color: ${v.textColor}; line-height: ${v.lineHeight}; word-wrap: break-word; -webkit-text-size-adjust: 100%;`,
-        h1:          `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 16px 0; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid ${v.accentColor};`,
-        h2:          `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 4px solid ${v.accentColor}; padding-left: 12px;`,
+        h1:          `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 16px 0; line-height: 1.4; padding-bottom: 18px; background-image: linear-gradient(#1a1a1a, #1a1a1a), linear-gradient(${v.accentColor}, ${v.accentColor}); background-repeat: no-repeat; background-size: 100% 2px, 40px 2px; background-position: 0 calc(100% - 8px), 0 100%;`,
+        h2:          `display: block; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 5px solid ${v.accentColor}; padding-left: 12px;`,
         h3:          `display: block; font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 28px 0 10px 0; line-height: 1.4; letter-spacing: 0.03em;`,
         h4:          `display: block; font-size: ${v.fontSize}px; font-weight: 600; color: #1a1a1a; margin: 20px 0 8px 0; line-height: 1.4;`,
         h5:          `display: block; font-size: ${v.fontSize - 1}px; font-weight: 600; color: #4a4a4a; margin: 16px 0 6px 0; line-height: 1.4;`,
@@ -172,7 +172,8 @@ const THEMES = {
         em:          `font-style: italic; color: ${v.accentColor};`,
         del:         `text-decoration: line-through; color: #aaaaaa;`,
         inlineCode:  `font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; font-size: 13px; background-color: #f4f3f0; color: ${v.accentColor}; padding: 1px 6px; border-radius: 3px; border: 1px solid #d8d5d0;`,
-        pre:         `display: block; background-color: #1e1e1e; border-radius: 8px; padding: 20px; margin: 28px 0; overflow-x: auto;`,
+        codeHeader:  `display: block; background-color: #2d2d2d; padding: 10px 16px; border-radius: 8px 8px 0 0;`,
+        pre:         `display: block; background-color: #1e1e1e; border-radius: 0 0 8px 8px; padding: 20px; margin: 0; overflow-x: auto;`,
         preCode:     `background-color: transparent; padding: 0; font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; font-size: 13.5px; line-height: 1.7; color: #d4d4d4; white-space: pre;`,
         blockquote:  `display: block; border-left: 3px solid ${v.accentColor}; padding: 18px 22px; margin: 28px 0; background-color: #f6f4f1; color: #555555; font-style: italic; border-radius: 0 4px 4px 0;`,
         ul:          `display: block; padding-left: 22px; margin: 20px 0;`,
@@ -215,13 +216,29 @@ function createRenderer(styles) {
   renderer.del         = (text) => `<del style="${styles.del}">${text}</del>`;
   renderer.codespan    = (code) => `<code style="${styles.inlineCode}">${code}</code>`;
   renderer.code        = (code, info) => {
+    const escaped = escapeHtml(code);
     const lang = info ? info.split(/\s+/)[0] : '';
+    if (styles.codeHeader) {
+      const dots = [
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff5f56;margin-right:5px;vertical-align:middle;"></span>`,
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffbd2e;margin-right:5px;vertical-align:middle;"></span>`,
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27c93f;vertical-align:middle;"></span>`,
+      ].join('');
+      const langLabel = lang ? `<span style="float:right;font-family:monospace;font-size:11px;color:#999;text-transform:uppercase;">${lang}</span>` : '';
+      return `<section style="margin:28px 0;overflow:hidden;border-radius:8px;">\n<section style="${styles.codeHeader}">${langLabel}${dots}</section>\n<pre style="${styles.pre}"><code style="${styles.preCode}">${escaped}</code></pre>\n</section>\n`;
+    }
     const label = lang
       ? `<span style="display:block;font-size:11px;color:#999;margin-bottom:8px;font-family:sans-serif;">${lang}</span>`
       : '';
-    return `<pre style="${styles.pre}">${label}<code style="${styles.preCode}">${escapeHtml(code)}</code></pre>\n`;
+    return `<pre style="${styles.pre}">${label}<code style="${styles.preCode}">${escaped}</code></pre>\n`;
   };
-  renderer.blockquote  = (q) => `<blockquote style="${styles.blockquote}">${q}</blockquote>\n`;
+  renderer.blockquote  = (q) => {
+    const needsItalic = styles.blockquote && styles.blockquote.includes('font-style: italic');
+    const processedQ = needsItalic
+      ? q.replace(/<p style="([^"]*)">/g, (_, s) => `<p style="${s}${s.endsWith(';') ? '' : ';'} font-style: italic;">`)
+      : q;
+    return `<blockquote style="${styles.blockquote}">${processedQ}</blockquote>\n`;
+  };
   renderer.list        = (body, ordered, start) => {
     const tag = ordered ? 'ol' : 'ul';
     const s   = ordered ? styles.ol : styles.ul;
