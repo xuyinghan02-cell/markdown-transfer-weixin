@@ -1,0 +1,14 @@
+{
+  "name": "markdown-to-weixin-mcp",
+  "version": "1.0.0",
+  "description": "MCP server — 将 Markdown 转换为微信公众号内联样式 HTML 并写入剪切板",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "marked": "^4.3.0"
+  }
+}
