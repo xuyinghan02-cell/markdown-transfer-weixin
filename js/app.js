@@ -79,7 +79,7 @@ const charCount   = document.getElementById('char-count');
 const wordCount   = document.getElementById('word-count');
 
 // ── 状态 ────────────────────────────────────────────────────
-let currentTheme = THEMES.default;
+let currentTheme = THEMES.literary;
 let overrides = {};
 let toastTimer = null;
 

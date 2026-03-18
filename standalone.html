@@ -429,7 +429,7 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.5; }
       <select id="theme-select">
         <option value="default">默认简洁</option>
         <option value="tech">科技感</option>
-        <option value="literary">文艺清新</option>
+        <option value="literary" selected>文艺清新</option>
       </select>
     </div>
     <div class="ctrl">
@@ -655,39 +655,39 @@ const THEMES = {
   literary: {
     name: '文艺清新',
     vars: {
-      accentColor: '#c0834b',
+      accentColor: '#8b1a1a',
       fontFamily: 'Georgia, "Times New Roman", "Songti SC", "SimSun", serif',
       fontSize: 16,
       lineHeight: 2.0,
-      textColor: '#3d2b1f',
-      mutedColor: '#8a6a5a',
+      textColor: '#2d1010',
+      mutedColor: '#7a4040',
     },
     styles(vars) {
       return {
         wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word;`,
-        h1: `display: block; font-size: 26px; font-weight: bold; color: #2d1f15; margin: 32px 0 16px 0; line-height: 1.4; text-align: center; letter-spacing: 3px;`,
-        h2: `display: block; font-size: 20px; font-weight: bold; color: #2d1f15; margin: 28px 0 14px 0; line-height: 1.4; text-align: center; border-bottom: 1px solid #d4b8a0; padding-bottom: 8px;`,
+        h1: `display: block; font-size: 26px; font-weight: bold; color: #1a0808; margin: 32px 0 16px 0; line-height: 1.4; text-align: center; letter-spacing: 3px;`,
+        h2: `display: block; font-size: 20px; font-weight: bold; color: #1a0808; margin: 28px 0 14px 0; line-height: 1.4; border-left: 4px solid ${vars.accentColor}; padding-left: 12px;`,
         h3: `display: block; font-size: ${vars.fontSize + 2}px; font-weight: bold; color: ${vars.accentColor}; margin: 22px 0 11px 0; line-height: 1.4;`,
-        h4: `display: block; font-size: ${vars.fontSize + 1}px; font-weight: bold; color: #3d2b1f; margin: 18px 0 9px 0; line-height: 1.4;`,
-        h5: `display: block; font-size: ${vars.fontSize}px; font-weight: bold; color: #5a4030; margin: 14px 0 7px 0; line-height: 1.4;`,
-        h6: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: bold; color: #8a6a5a; margin: 12px 0 6px 0; line-height: 1.4;`,
+        h4: `display: block; font-size: ${vars.fontSize + 1}px; font-weight: bold; color: #2d1010; margin: 18px 0 9px 0; line-height: 1.4;`,
+        h5: `display: block; font-size: ${vars.fontSize}px; font-weight: bold; color: #5a2020; margin: 14px 0 7px 0; line-height: 1.4;`,
+        h6: `display: block; font-size: ${vars.fontSize - 1}px; font-weight: bold; color: #7a4040; margin: 12px 0 6px 0; line-height: 1.4;`,
         p: `display: block; margin: 14px 0; line-height: ${vars.lineHeight}; color: ${vars.textColor}; font-size: ${vars.fontSize}px; text-indent: 2em;`,
-        strong: `font-weight: bold; color: #2d1f15;`,
+        strong: `font-weight: bold; color: #1a0808;`,
         em: `font-style: italic; color: ${vars.accentColor};`,
-        del: `text-decoration: line-through; color: #b09080;`,
-        inlineCode: `background-color: #fdf6ee; padding: 2px 5px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 87%; color: ${vars.accentColor};`,
-        pre: `display: block; background-color: #fdf6ee; border-radius: 6px; padding: 16px; margin: 16px 0; border-left: 4px solid ${vars.accentColor}; overflow-x: auto;`,
-        preCode: `background-color: transparent; padding: 0; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; line-height: 1.6; color: #5a4030; white-space: pre;`,
-        blockquote: `display: block; border-left: 4px solid ${vars.accentColor}; padding: 12px 20px; margin: 20px 0; background-color: #fdf6ee; color: ${vars.mutedColor}; font-style: italic;`,
+        del: `text-decoration: line-through; color: #b07070;`,
+        inlineCode: `background-color: #fdf2f2; padding: 2px 5px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 87%; color: ${vars.accentColor};`,
+        pre: `display: block; background-color: #fdf2f2; border-radius: 6px; padding: 16px; margin: 16px 0; border-left: 4px solid ${vars.accentColor}; overflow-x: auto;`,
+        preCode: `background-color: transparent; padding: 0; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; line-height: 1.6; color: #5a2020; white-space: pre;`,
+        blockquote: `display: block; border-left: 4px solid ${vars.accentColor}; padding: 12px 20px; margin: 20px 0; background-color: #fdf2f2; color: ${vars.mutedColor}; font-style: italic;`,
         ul: `display: block; padding-left: 24px; margin: 14px 0;`,
         ol: `display: block; padding-left: 24px; margin: 14px 0;`,
         li: `display: list-item; margin: 8px 0; line-height: ${vars.lineHeight}; font-size: ${vars.fontSize}px; color: ${vars.textColor};`,
         a: `color: ${vars.accentColor}; text-decoration: underline; text-underline-offset: 3px;`,
         img: `display: block; max-width: 100%; height: auto; margin: 20px auto; border-radius: 4px;`,
-        hr: `display: block; border: none; border-top: 1px dashed #d4b8a0; margin: 32px 0;`,
+        hr: `display: block; border: none; border-top: 1px dashed #c8a0a0; margin: 32px 0;`,
         table: `border-collapse: collapse; width: 100%; margin: 16px 0; font-size: ${vars.fontSize - 1}px;`,
-        th: `background-color: #fdf6ee; border: 1px solid #e8d5c0; padding: 8px 12px; text-align: left; font-weight: bold; color: #3d2b1f;`,
-        td: `border: 1px solid #e8d5c0; padding: 8px 12px; color: ${vars.textColor};`,
+        th: `background-color: #fdf2f2; border: 1px solid #e0c0c0; padding: 8px 12px; text-align: left; font-weight: bold; color: #2d1010;`,
+        td: `border: 1px solid #e0c0c0; padding: 8px 12px; color: ${vars.textColor};`,
       };
     },
   },
@@ -929,7 +929,7 @@ const charCount   = document.getElementById('char-count');
 const wordCount   = document.getElementById('word-count');
 
 // ── 状态 ────────────────────────────────────────────────────
-let currentTheme = THEMES.default;
+let currentTheme = THEMES.literary;
 let overrides = {};
 let toastTimer = null;
 
@@ -1191,7 +1191,7 @@ function renderThemeList() {
   const builtins = [
     { key: 'default',  label: '默认简洁', color: '#07c160' },
     { key: 'tech',     label: '科技感',   color: '#4f9cf9' },
-    { key: 'literary', label: '文艺清新', color: '#c0834b' },
+    { key: 'literary', label: '文艺清新', color: '#8b1a1a' },
   ];
 
   let html = '<ul class="tl">';
