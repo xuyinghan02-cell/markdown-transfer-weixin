@@ -137,6 +137,19 @@ MCP Server（本地 Node.js 进程）
 用户在微信公众号编辑器 Ctrl+V 粘贴 ✓
 ```
 
+### 在 openclaw 中通过 skill 一键接入
+
+openclaw 支持通过 skill 文件扩展功能。只需将 `SKILL.md` 提供给 openclaw，它便会根据文件中的指引自动完成安装，并将该 skill 注册到自身以供后续直接调用，无需手动配置 MCP。
+
+将以下内容发送给 openclaw：
+
+```
+请按照这份 skill 文件完成安装和注册：
+[粘贴 SKILL.md 的全部内容]
+```
+
+openclaw 会自动执行安装步骤（克隆仓库、`npm install`、写入 MCP 配置），完成后即可直接对话触发转换。
+
 ### 在 Claude Code 中使用 skill
 
 如果你在 Claude Code 中工作，可以使用内置 skill：
