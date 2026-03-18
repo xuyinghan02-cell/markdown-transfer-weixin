@@ -13,8 +13,9 @@
 调用 MCP 工具 `convert_markdown_to_weixin`，参数如下：
 
 - `markdown`：用户提供的 Markdown 文本（必填）
-- `theme`：若用户未指定，默认使用 `literary`
-  - `literary` — 文艺清新（衬线字体，**深红色调**，默认主题）
+- `theme`：若用户未指定，默认使用 `magazine`
+  - `magazine` — 现代杂志（衬线标题，H1 双色底线，H2 红色竖条，仿 macOS 代码块，引用斜体，**默认主题**）
+  - `literary` — 文艺清新（衬线字体，深红色调，H2 左竖条装饰）
   - `default` — 默认简洁（绿色主色，清晰易读）
   - `tech` — 科技感（深色代码块、蓝色高亮）
 - `accent_color`：可选，覆盖主色调，十六进制如 `#8b1a1a`
@@ -31,7 +32,7 @@
 告知用户使用独立网页（`standalone.html`）中的主题管理功能：
 
 - **自定义主题**：点击「主题管理」→「新建主题」，可设置颜色、字号、字体，并对各标题/段落元素单独覆盖 CSS
-- **从公众号提取**：点击「主题管理」→「从公众号提取」，粘贴文章 HTML 源码（浏览器 `Ctrl+U`），自动解析排版样式生成可编辑主题
+- **从公众号提取**：点击「主题管理」→「从公众号提取」，粘贴文章 HTML 源码（浏览器 `Ctrl+U`），自动解析内联样式、CSS 类及 CSS 变量生成可编辑主题，可选择继承的基础主题
 
 ### 3. 如果用户没有提供内容，只是想了解如何接入
 
@@ -97,7 +98,7 @@ npm install
 
 参数：
   markdown     (string, 必填)  要转换的 Markdown 内容
-  theme        (string, 可选)  literary（默认）| default | tech
+  theme        (string, 可选)  magazine（默认）| literary | default | tech
   accent_color (string, 可选)  主色，如 #8b1a1a
   font_size    (number, 可选)  字号 px，如 16
   line_height  (number, 可选)  行高倍数，如 2.0
