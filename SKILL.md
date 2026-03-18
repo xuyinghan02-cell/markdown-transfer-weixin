@@ -1,4 +1,4 @@
-# /weixin-mcp — 微信公众号 Markdown 转换（MCP 集成指南）
+# weixin-mcp — 微信公众号 Markdown 转换（MCP 集成指南）
 
 将用户提供的 Markdown 内容通过 `convert_markdown_to_weixin` MCP 工具完成转换，并给出完整的接入使用说明。
 
@@ -28,7 +28,7 @@
 
 ### 2. 如果用户没有提供内容，只是想了解如何接入
 
-输出以下接入说明：
+参照下方 **MCP 接入说明** 输出给用户。
 
 ---
 
@@ -44,7 +44,7 @@
 
 ```bash
 # 1. 克隆仓库
-git clone <仓库地址>
+git clone https://github.com/xuyinghan02-cell/markdown-transfer-weixin
 cd markdown-transfer-weixin/mcp
 
 # 2. 安装依赖
@@ -61,7 +61,7 @@ npm install
   "mcpServers": {
     "markdown-to-weixin": {
       "command": "node",
-      "args": ["/绝对路径/mcp/server.js"]
+      "args": ["/绝对路径/markdown-transfer-weixin/mcp/server.js"]
     }
   }
 }
@@ -73,11 +73,13 @@ npm install
   "mcpServers": {
     "markdown-to-weixin": {
       "command": "node",
-      "args": ["/绝对路径/mcp/server.js"]
+      "args": ["/绝对路径/markdown-transfer-weixin/mcp/server.js"]
     }
   }
 }
 ```
+
+> 提示：将 `/绝对路径/markdown-transfer-weixin` 替换为实际克隆路径，例如 `/home/user/markdown-transfer-weixin`。
 
 ### 可用工具
 
