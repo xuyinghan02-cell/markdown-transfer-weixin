@@ -137,8 +137,8 @@ const THEMES = {
     styles(vars) {
       return {
         wrapper: `font-family: ${vars.fontFamily}; font-size: ${vars.fontSize}px; color: ${vars.textColor}; line-height: ${vars.lineHeight}; word-wrap: break-word; -webkit-text-size-adjust: 100%;`,
-        h1: `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 8px 0; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid #1a1a1a;`,
-        h1Decoration: `<span style="display:block;width:40px;height:2px;background-color:${vars.accentColor};margin-top:6px;margin-bottom:8px;"></span>`,
+        h1: `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 8px 0; line-height: 1.4; padding-bottom: 10px;`,
+        h1Decoration: `<span style="display:block;width:100%;height:2px;background:linear-gradient(to right, ${vars.accentColor} 40px, #1a1a1a 40px);margin-top:0;margin-bottom:8px;"></span>`,
         h2: `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 5px solid ${vars.accentColor}; padding-left: 12px;`,
         h3: `display: block; font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 28px 0 10px 0; line-height: 1.4; letter-spacing: 0.03em;`,
         h4: `display: block; font-size: ${vars.fontSize}px; font-weight: 600; color: #1a1a1a; margin: 20px 0 8px 0; line-height: 1.4;`,

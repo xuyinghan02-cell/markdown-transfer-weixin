@@ -161,8 +161,8 @@ const THEMES = {
     styles(v) {
       return {
         wrapper:     `font-family: ${v.fontFamily}; font-size: ${v.fontSize}px; color: ${v.textColor}; line-height: ${v.lineHeight}; word-wrap: break-word; -webkit-text-size-adjust: 100%;`,
-        h1:          `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 8px 0; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid #1a1a1a;`,
-        h1Decoration: `<span style="display:block;width:40px;height:2px;background-color:${v.accentColor};margin-top:6px;margin-bottom:8px;"></span>`,
+        h1:          `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 44px 0 8px 0; line-height: 1.4; padding-bottom: 10px;`,
+        h1Decoration: `<span style="display:block;width:100%;height:2px;background:linear-gradient(to right, ${v.accentColor} 40px, #1a1a1a 40px);margin-top:0;margin-bottom:8px;"></span>`,
         h2:          `display: block; font-family: 'Noto Serif SC', 'Songti SC', Georgia, serif; font-size: 19px; font-weight: 600; color: #1a1a1a; margin: 36px 0 12px 0; line-height: 1.45; border-left: 5px solid ${v.accentColor}; padding-left: 12px;`,
         h3:          `display: block; font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 28px 0 10px 0; line-height: 1.4; letter-spacing: 0.03em;`,
         h4:          `display: block; font-size: ${v.fontSize}px; font-weight: 600; color: #1a1a1a; margin: 20px 0 8px 0; line-height: 1.4;`,
@@ -409,8 +409,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           theme: {
             type: 'string',
             enum: ['default', 'tech', 'literary', 'magazine'],
-            description: '排版主题：literary（文艺清新，默认）| default（默认简洁）| tech（科技感）| magazine（现代杂志）',
-            default: 'literary',
+            description: '排版主题：magazine（现代杂志，默认）| default（默认简洁）| tech（科技感）| literary（文艺清新）',
+            default: 'magazine',
           },
           accent_color: {
             type: 'string',
@@ -448,7 +448,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   const {
     markdown,
-    theme = 'literary',
+    theme = 'magazine',
     accent_color,
     font_size,
     line_height,
